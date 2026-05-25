@@ -58,6 +58,18 @@ kokoro_pipeline = KPipeline(lang_code='b')
 # ── OpenClaw Gateway (reachable over Tailscale) ──────────────────────────────
 OPENCLAW_GATEWAY = os.getenv("OPENCLAW_GATEWAY", "http://100.x.x.x:8000/dispatch")
 
+# ── Nick Vault context (fetched once at startup over Tailscale SOCKS5) ───────
+VAULT_URL = os.getenv("VAULT_URL", "http://100.105.129.77:9876/vault")
+VAULT_CONTEXT = ""
+try:
+    import httpx as _httpx
+    _r = _httpx.get(VAULT_URL, proxy="socks5h://localhost:1055", timeout=15.0)
+    _r.raise_for_status()
+    VAULT_CONTEXT = _r.text.strip()
+    print(f"[vault] loaded {len(VAULT_CONTEXT):,} chars from {VAULT_URL}")
+except Exception as _e:
+    print(f"[vault] could not load vault context: {_e}")
+
 
 async def _fire_dispatch(payload: dict) -> None:
     """Non-blocking POST to OpenClaw over Tailscale SOCKS5."""
@@ -97,7 +109,11 @@ def handler(job):
         "are a smartass about it.",
     )
 
-    # ── Network Volume context injection ────────────────────────────────────
+    # ── Vault memory (loaded at worker startup, injected every call) ────────
+    if VAULT_CONTEXT:
+        system_prompt += f"\n\n--- Nick's Vault Memory ---\n{VAULT_CONTEXT}"
+
+    # ── Network Volume context injection (optional extra context) ────────────
     try:
         ctx_path = "/runpod-volume/context.md"
         if os.path.exists(ctx_path):
