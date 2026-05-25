@@ -1,0 +1,13 @@
+runpod
+openai-whisper
+torch
+torchaudio
+transformers
+accelerate
+huggingface_hub
+kokoro
+soundfile
+numpy
+httpx[socks]
+requests[socks]
+pysocks
