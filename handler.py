@@ -40,9 +40,9 @@ print("Loading Whisper...")
 whisper_model = whisper.load_model("base")
 
 print("Loading Llama 3 8B...")
-llm_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B-Instruct")
+llm_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3.1-8B-Instruct")
 llm_model = AutoModelForCausalLM.from_pretrained(
-    "meta-llama/Meta-Llama-3-8B-Instruct",
+    "meta-llama/Meta-Llama-3.1-8B-Instruct",
     torch_dtype=torch.float16,
     device_map="auto",
 )
